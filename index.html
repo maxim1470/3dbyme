@@ -228,19 +228,21 @@ const loadingText = document.getElementById("loadingText");
 function checkImage(url){
     return new Promise(resolve => {
         const img = new Image();
-        img.onload = () => resolve(true);
+        img.onload = () => resolve(img.naturalWidth > 0);
         img.onerror = () => resolve(false);
         img.src = url;
     });
 }
 
-function fetchText(url){
-    return new Promise(resolve => {
-        fetch(url)
-            .then(r => r.ok ? r.text() : resolve(""))
-            .then(t => resolve(t || ""))
-            .catch(() => resolve(""));
-    });
+async function fetchText(url){
+    try{
+        const r = await fetch(url);
+        if(!r.ok) return "";
+        const t = await r.text();
+        return t.trim();
+    }catch{
+        return "";
+    }
 }
 
 async function loadProjects(){
