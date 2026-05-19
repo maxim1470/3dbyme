@@ -225,6 +225,36 @@ const BRANCH = "main";
 const gallery = document.getElementById("galleryGrid");
 const loadingText = document.getElementById("loadingText");
 
+function checkImage(url){
+    return new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+        img.src = url;
+    });
+}
+
+function checkVideo(url){
+    return new Promise(resolve => {
+        const v = document.createElement("video");
+        v.oncanplaythrough = () => resolve(true);
+        v.onerror = () => resolve(false);
+        v.onloadedmetadata = () => resolve(true);
+        setTimeout(() => resolve(false), 4000);
+        v.src = url;
+        v.load();
+    });
+}
+
+function fetchText(url){
+    return new Promise(resolve => {
+        fetch(url)
+            .then(r => r.ok ? r.text() : resolve(""))
+            .then(t => resolve(t || ""))
+            .catch(() => resolve(""));
+    });
+}
+
 async function loadProjects(){
 
     let index = 1;
@@ -232,82 +262,48 @@ async function loadProjects(){
 
     while(true){
 
-        const imageUrl = `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/${index}.jpg`;
-        const imagePngUrl = `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/${index}.png`;
+        const base = `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}`;
 
-        const titleUrl = `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/ttext${index}.txt`;
-        const descUrl = `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/dtext${index}.txt`;
+        const jpgUrl  = `${base}/${index}.jpg`;
+        const pngUrl  = `${base}/${index}.png`;
 
-        const videoFormats = [
-            { url: `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/video${index}.mp4`, type: "video/mp4" },
-            { url: `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/video${index}.avi`, type: "video/x-msvideo" },
-            { url: `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/video${index}.mov`, type: "video/quicktime" }
-        ];
+        const jpgOk = await checkImage(jpgUrl);
+        const imageFinal = jpgOk ? jpgUrl : (await checkImage(pngUrl) ? pngUrl : null);
 
-        let imageFinal = null;
-
-        const jpgCheck = await fetch(imageUrl);
-        const pngCheck = await fetch(imagePngUrl);
-
-        if(jpgCheck.ok){
-            imageFinal = imageUrl;
-        }
-        else if(pngCheck.ok){
-            imageFinal = imagePngUrl;
-        }
-        else{
-            break;
-        }
+        if(!imageFinal) break;
 
         foundAnything = true;
 
-        let title = `Project ${index}`;
-        let description = "";
+        const title       = (await fetchText(`${base}/ttext${index}.txt`)) || `Project ${index}`;
+        const description = await fetchText(`${base}/dtext${index}.txt`);
 
-        try{
-            const titleFetch = await fetch(titleUrl);
-            if(titleFetch.ok){
-                title = await titleFetch.text();
-            }
-        }catch{}
-
-        try{
-            const descFetch = await fetch(descUrl);
-            if(descFetch.ok){
-                description = await descFetch.text();
-            }
-        }catch{}
+        const videoFormats = [
+            { url: `${base}/video${index}.mp4`, type: "video/mp4" },
+            { url: `${base}/video${index}.mov`, type: "video/quicktime" },
+            { url: `${base}/video${index}.avi`, type: "video/x-msvideo" }
+        ];
 
         let videoFound = null;
-
         for(const fmt of videoFormats){
-            try{
-                const videoCheck = await fetch(fmt.url);
-                if(videoCheck.ok){
-                    videoFound = fmt;
-                    break;
-                }
-            }catch{}
+            const ok = await checkVideo(fmt.url);
+            if(ok){ videoFound = fmt; break; }
         }
 
         const card = document.createElement("div");
         card.className = "card";
 
         card.innerHTML = `
-
             ${videoFound ? `
             <video controls>
                 <source src="${videoFound.url}" type="${videoFound.type}">
             </video>
             ` : `
-            <img src="${imageFinal}">
+            <img src="${imageFinal}" alt="${title}">
             `}
-
             <div class="card-content">
                 <h3>${title}</h3>
                 <p>${description}</p>
             </div>
-
         `;
 
         gallery.appendChild(card);
