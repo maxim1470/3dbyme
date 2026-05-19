@@ -234,16 +234,13 @@ function checkImage(url){
     });
 }
 
-function checkVideo(url){
-    return new Promise(resolve => {
-        const v = document.createElement("video");
-        v.oncanplaythrough = () => resolve(true);
-        v.onerror = () => resolve(false);
-        v.onloadedmetadata = () => resolve(true);
-        setTimeout(() => resolve(false), 4000);
-        v.src = url;
-        v.load();
-    });
+async function checkVideo(url){
+    try{
+        const r = await fetch(url, { method: "HEAD" });
+        return r.ok;
+    }catch{
+        return false;
+    }
 }
 
 function fetchText(url){
