@@ -252,11 +252,11 @@ async function loadProjects(){
 
         const base = `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}`;
 
-        const jpgUrl  = `${base}/${index}.jpg`;
-        const pngUrl  = `${base}/${index}.png`;
+        const jpgUrl = `${base}/${index}.jpg`;
+        const pngUrl = `${base}/${index}.png`;
 
-        const jpgOk = await checkImage(jpgUrl);
-        const imageFinal = jpgOk ? jpgUrl : (await checkImage(pngUrl) ? pngUrl : null);
+        const [jpgOk, pngOk] = await Promise.all([checkImage(jpgUrl), checkImage(pngUrl)]);
+        const imageFinal = jpgOk ? jpgUrl : pngOk ? pngUrl : null;
 
         if(!imageFinal) break;
 
