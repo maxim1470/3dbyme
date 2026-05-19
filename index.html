@@ -293,13 +293,12 @@ async function loadProjects(){
         card.className = "card";
 
         card.innerHTML = `
+            <img src="${imageFinal}" alt="${title}">
             ${videoFound ? `
             <video controls>
                 <source src="${videoFound.url}" type="${videoFound.type}">
             </video>
-            ` : `
-            <img src="${imageFinal}" alt="${title}">
-            `}
+            ` : ``}
             <div class="card-content">
                 <h3>${title}</h3>
                 <p>${description}</p>
