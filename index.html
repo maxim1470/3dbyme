@@ -225,13 +225,13 @@ const BRANCH = "main";
 const gallery = document.getElementById("galleryGrid");
 const loadingText = document.getElementById("loadingText");
 
-function checkImage(url){
-    return new Promise(resolve => {
-        const img = new Image();
-        img.onload = () => resolve(img.naturalWidth > 0);
-        img.onerror = () => resolve(false);
-        img.src = url;
-    });
+async function checkImage(url){
+    try{
+        const r = await fetch(url);
+        return r.ok;
+    }catch{
+        return false;
+    }
 }
 
 async function fetchText(url){
@@ -273,7 +273,7 @@ async function loadProjects(){
         cardEl.className = "card";
 
         cardEl.innerHTML = `
-            <img src="${imageFinal}" alt="${title}">
+            <img src="${imageFinal}" alt="${title}" crossorigin="anonymous">
             ${videoUrl.trim() ? `<video controls preload="metadata" style="display:block;width:100%;max-height:420px;background:black;">
                 <source src="${videoUrl.trim()}">
             </video>` : ""}
