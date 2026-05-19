@@ -275,9 +275,9 @@ async function loadProjects(){
         const description = await fetchText(`${base}/dtext${index}.txt`);
 
         const videoFormats = [
-            { url: `${base}/video${index}.mp4`, type: "video/mp4" },
-            { url: `${base}/video${index}.mov`, type: "video/quicktime" },
-            { url: `${base}/video${index}.avi`, type: "video/x-msvideo" }
+            { url: `https://media.githubusercontent.com/media/${USERNAME}/${REPO}/${BRANCH}/video${index}.mp4`, type: "video/mp4" },
+            { url: `https://media.githubusercontent.com/media/${USERNAME}/${REPO}/${BRANCH}/video${index}.mov`, type: "video/quicktime" },
+            { url: `https://media.githubusercontent.com/media/${USERNAME}/${REPO}/${BRANCH}/video${index}.avi`, type: "video/x-msvideo" }
         ];
 
         let videoFound = null;
