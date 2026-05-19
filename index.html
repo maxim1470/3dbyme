@@ -187,12 +187,9 @@ footer{
 
 <nav>
     <div class="logo">3DByMe</div>
-    <a href="#gallery">My Prints</a>
 </nav>
 
 <section class="hero">
-
-    <div class="hero-badge">Handmade in New York</div>
 
     <h1>Custom <span>3D Prints</span><br>Made by Me</h1>
 
@@ -241,7 +238,11 @@ async function loadProjects(){
         const titleUrl = `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/ttext${index}.txt`;
         const descUrl = `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/dtext${index}.txt`;
 
-        const videoMp4Url = `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/video${index}.mp4`;
+        const videoFormats = [
+            { url: `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/video${index}.mp4`, type: "video/mp4" },
+            { url: `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/video${index}.avi`, type: "video/x-msvideo" },
+            { url: `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/video${index}.mov`, type: "video/quicktime" }
+        ];
 
         let imageFinal = null;
 
@@ -277,23 +278,26 @@ async function loadProjects(){
             }
         }catch{}
 
-        let hasVideo = false;
+        let videoFound = null;
 
-        try{
-            const videoCheck = await fetch(videoMp4Url);
-            if(videoCheck.ok){
-                hasVideo = true;
-            }
-        }catch{}
+        for(const fmt of videoFormats){
+            try{
+                const videoCheck = await fetch(fmt.url);
+                if(videoCheck.ok){
+                    videoFound = fmt;
+                    break;
+                }
+            }catch{}
+        }
 
         const card = document.createElement("div");
         card.className = "card";
 
         card.innerHTML = `
 
-            ${hasVideo ? `
+            ${videoFound ? `
             <video controls>
-                <source src="${videoMp4Url}" type="video/mp4">
+                <source src="${videoFound.url}" type="${videoFound.type}">
             </video>
             ` : `
             <img src="${imageFinal}">
