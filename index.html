@@ -1,4 +1,266 @@
+# Dynamic 3DByMe Website (GitHub + Vercel)
+
+Save this as `index.html`
+
+```html
 <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3DByMe</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Inter',sans-serif;
+    background:#0b0f17;
+    color:white;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+nav{
+    position:fixed;
+    width:100%;
+    top:0;
+    left:0;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:18px 7%;
+    background:rgba(0,0,0,.55);
+    backdrop-filter:blur(12px);
+    z-index:1000;
+    border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.logo{
+    font-size:30px;
+    font-weight:800;
+    background:linear-gradient(90deg,#00bfff,#00ff95);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+nav a{
+    color:white;
+    text-decoration:none;
+    font-weight:600;
+}
+
+.hero{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    text-align:center;
+    padding:120px 20px 40px;
+    background:
+    linear-gradient(rgba(0,0,0,.7),rgba(0,0,0,.85)),
+    url('https://images.unsplash.com/photo-1581092921461-eab62e97a780?q=80&w=1600&auto=format&fit=crop') center/cover;
+}
+
+.hero h1{
+    font-size:82px;
+    font-weight:800;
+    line-height:1;
+}
+
+.hero span{
+    background:linear-gradient(90deg,#00bfff,#00ff95);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.hero p{
+    max-width:850px;
+    margin-top:25px;
+    color:#cfcfcf;
+    font-size:22px;
+    line-height:1.7;
+}
+
+.section-title{
+    text-align:center;
+    font-size:52px;
+    margin-bottom:60px;
+}
+
+.gallery{
+    padding:100px 7%;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:30px;
+}
+
+.card{
+    background:#121826;
+    border-radius:24px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.08);
+    transition:.35s;
+}
+
+.card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 18px 45px rgba(0,191,255,.18);
+}
+
+.card img,
+.card video{
+    width:100%;
+    display:block;
+    max-height:420px;
+    object-fit:cover;
+    background:black;
+}
+
+.card-content{
+    padding:25px;
+}
+
+.card-content h3{
+    font-size:28px;
+    margin-bottom:12px;
+}
+
+.card-content p{
+    color:#c5c5c5;
+    line-height:1.7;
+}
+
+footer{
+    text-align:center;
+    padding:45px;
+    border-top:1px solid rgba(255,255,255,.08);
+    color:#909090;
+    margin-top:70px;
+}
+
+.loading{
+    text-align:center;
+    color:#9f9f9f;
+    margin-top:40px;
+    font-size:20px;
+}
+
+@media(max-width:900px){
+
+    .hero h1{
+        font-size:56px;
+    }
+
+    .hero p{
+        font-size:18px;
+    }
+
+}
+
+</style>
+</head>
+<body>
+
+<nav>
+    <div class="logo">3DByMe</div>
+    <a href="#gallery">My Prints</a>
+</nav>
+
+<section class="hero">
+
+    <h1>Create.<br><span>Print.</span><br>Display.</h1>
+
+    <p>
+        Custom 3D printed bookmarks, phone stands,
+        decorations, and creative designs made by me.
+    </p>
+
+</section>
+
+<section class="gallery" id="gallery">
+
+    <h2 class="section-title">My 3D Prints</h2>
+
+    <div class="grid" id="galleryGrid"></div>
+
+    <div class="loading" id="loadingText">
+        Loading projects...
+    </div>
+
+</section>
+
+<footer>
+    © 2026 3DByMe — Hosted on Vercel
+</footer>
+
+<script>
+
+const USERNAME = "maxim1470";
+const REPO = "3dbyme";
+const BRANCH = "main";
+
+const gallery = document.getElementById("galleryGrid");
+const loadingText = document.getElementById("loadingText");
+
+async function loadProjects(){
+
+    let index = 1;
+    let foundAnything = false;
+
+    while(true){
+
+        const imageUrl = `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/${index}.jpg`;
+        const imagePngUrl = `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/${index}.png`;
+
+        const titleUrl = `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/ttext${index}.txt`;
+        const descUrl = `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/dtext${index}.txt`;
+
+        const videoMp4Url = `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/video${index}.mp4`;
+
+        let imageFinal = null;
+
+        const jpgCheck = await fetch(imageUrl);
+        const pngCheck = await fetch(imagePngUrl);
+
+        if(jpgCheck.ok){
+            imageFinal = imageUrl;
+        }
+        else if(pngCheck.ok){
+            imageFinal = imagePngUrl;
+        }
+        else{
+            break;
+        }
+
+        foundAnything = true;
+
+        let title = `Project ${index}`;
+        let description = "";
+
+        try{
+            const titleFetch = await fetch(titleUrl);
+            if(titleFetch.ok){
+                title = await titleFetch.text();
+            }
+        }catch{}
+
+        try{
+            const descFetch = await fetch(descUrl);
+            if(descFetch.ok){
                 description = await descFetch.text();
             }
         }catch{}
@@ -52,3 +314,77 @@ loadProjects();
 
 </body>
 </html>
+```
+
+# GitHub Repository Structure
+
+Your repository should look like this:
+
+```text
+1.jpg
+2.jpg
+3.jpg
+
+video1.mp4
+video3.mp4
+
+ttext1.txt
+ttext2.txt
+ttext3.txt
+
+dtext1.txt
+dtext2.txt
+dtext3.txt
+
+index.html
+```
+
+# Example
+
+`ttext1.txt`
+
+```text
+Phone Stand
+```
+
+`dtext1.txt`
+
+```text
+Modern 3D printed phone stand for desks and gaming setups.
+```
+
+# Important
+
+Inside the HTML replace:
+
+```js
+const USERNAME = "YOUR_GITHUB_USERNAME";
+const REPO = "YOUR_REPOSITORY_NAME";
+```
+
+with your actual GitHub username and repository name.
+
+Example:
+
+```js
+const USERNAME = "maxim1470";
+const REPO = "3dbyme";
+```
+
+# Upload To Vercel
+
+1. Create GitHub repo
+2. Upload all files
+3. Upload `index.html`
+4. Import repo into Vercel
+5. Done
+
+Every time you add:
+
+* `4.jpg`
+* `ttext4.txt`
+* `dtext4.txt`
+
+it automatically appears on the website.
+
+The website expands automatically based on how many files exist.
