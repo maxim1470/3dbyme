@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+                description = await descFetch.text();
+            }
+        }catch{}
+
+        let hasVideo = false;
+
+        try{
+            const videoCheck = await fetch(videoMp4Url);
+            if(videoCheck.ok){
+                hasVideo = true;
+            }
+        }catch{}
+
+        const card = document.createElement("div");
+        card.className = "card";
+
+        card.innerHTML = `
+
+            ${hasVideo ? `
+            <video controls>
+                <source src="${videoMp4Url}" type="video/mp4">
+            </video>
+            ` : `
+            <img src="${imageFinal}">
+            `}
+
+            <div class="card-content">
+                <h3>${title}</h3>
+                <p>${description}</p>
+            </div>
+
+        `;
+
+        gallery.appendChild(card);
+
+        index++;
+    }
+
+    if(foundAnything){
+        loadingText.style.display = "none";
+    }
+    else{
+        loadingText.innerHTML = "No projects found in GitHub repository.";
+    }
+
+}
+
+loadProjects();
+
+</script>
+
+</body>
+</html>
