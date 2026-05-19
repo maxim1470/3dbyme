@@ -234,16 +234,6 @@ function checkImage(url){
     });
 }
 
-function checkExists(url){
-    return new Promise(resolve => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("HEAD", url);
-        xhr.onload = () => resolve(xhr.status === 200);
-        xhr.onerror = () => resolve(false);
-        xhr.send();
-    });
-}
-
 function fetchText(url){
     return new Promise(resolve => {
         fetch(url)
@@ -275,25 +265,15 @@ async function loadProjects(){
         const title       = (await fetchText(`${base}/ttext${index}.txt`)) || `Project ${index}`;
         const description = await fetchText(`${base}/dtext${index}.txt`);
 
-        const videoFormats = [
-            { url: `${base}/video${index}.mp4`, type: "video/mp4" },
-            { url: `${base}/video${index}.mov`, type: "video/quicktime" },
-            { url: `${base}/video${index}.avi`, type: "video/x-msvideo" }
-        ];
-
-        let videoFound = null;
-        for(const fmt of videoFormats){
-            const exists = await checkExists(fmt.url);
-            if(exists){ videoFound = fmt; break; }
-        }
+        const videoUrl = await fetchText(`${base}/video${index}.txt`);
 
         const cardEl = document.createElement("div");
         cardEl.className = "card";
 
         cardEl.innerHTML = `
             <img src="${imageFinal}" alt="${title}">
-            ${videoFound ? `<video controls preload="metadata" style="display:block;width:100%;max-height:420px;background:black;">
-                <source src="${videoFound.url}" type="${videoFound.type}">
+            ${videoUrl.trim() ? `<video controls preload="metadata" style="display:block;width:100%;max-height:420px;background:black;">
+                <source src="${videoUrl.trim()}">
             </video>` : ""}
             <div class="card-content">
                 <h3>${title}</h3>
