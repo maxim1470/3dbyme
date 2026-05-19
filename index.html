@@ -234,6 +234,16 @@ function checkImage(url){
     });
 }
 
+function checkExists(url){
+    return new Promise(resolve => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("HEAD", url);
+        xhr.onload = () => resolve(xhr.status === 200);
+        xhr.onerror = () => resolve(false);
+        xhr.send();
+    });
+}
+
 function fetchText(url){
     return new Promise(resolve => {
         fetch(url)
@@ -266,21 +276,25 @@ async function loadProjects(){
         const description = await fetchText(`${base}/dtext${index}.txt`);
 
         const videoFormats = [
-            { url: `https://media.githubusercontent.com/media/${USERNAME}/${REPO}/${BRANCH}/video${index}.mp4`, type: "video/mp4" },
-            { url: `https://media.githubusercontent.com/media/${USERNAME}/${REPO}/${BRANCH}/video${index}.mov`, type: "video/quicktime" },
-            { url: `https://media.githubusercontent.com/media/${USERNAME}/${REPO}/${BRANCH}/video${index}.avi`, type: "video/x-msvideo" }
+            { url: `${base}/video${index}.mp4`, type: "video/mp4" },
+            { url: `${base}/video${index}.mov`, type: "video/quicktime" },
+            { url: `${base}/video${index}.avi`, type: "video/x-msvideo" }
         ];
 
-        let videoFound = videoFormats[0];
+        let videoFound = null;
+        for(const fmt of videoFormats){
+            const exists = await checkExists(fmt.url);
+            if(exists){ videoFound = fmt; break; }
+        }
 
         const cardEl = document.createElement("div");
         cardEl.className = "card";
 
         cardEl.innerHTML = `
             <img src="${imageFinal}" alt="${title}">
-            <video controls id="vid${index}" style="display:block;width:100%;max-height:420px;background:black;">
-                ${videoFormats.map(f => `<source src="${f.url}" type="${f.type}">`).join("")}
-            </video>
+            ${videoFound ? `<video controls preload="metadata" style="display:block;width:100%;max-height:420px;background:black;">
+                <source src="${videoFound.url}" type="${videoFound.type}">
+            </video>` : ""}
             <div class="card-content">
                 <h3>${title}</h3>
                 <p>${description}</p>
@@ -288,13 +302,6 @@ async function loadProjects(){
         `;
 
         gallery.appendChild(cardEl);
-
-        const vidEl = cardEl.querySelector("video");
-        vidEl.addEventListener("error", () => { vidEl.style.display = "none"; });
-        vidEl.load();
-        setTimeout(() => {
-            if(vidEl.readyState === 0) vidEl.style.display = "none";
-        }, 3000);
 
         index++;
     }
