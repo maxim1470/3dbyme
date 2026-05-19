@@ -234,15 +234,6 @@ function checkImage(url){
     });
 }
 
-async function checkVideo(url){
-    try{
-        const r = await fetch(url, { method: "HEAD" });
-        return r.ok;
-    }catch{
-        return false;
-    }
-}
-
 function fetchText(url){
     return new Promise(resolve => {
         fetch(url)
@@ -280,29 +271,30 @@ async function loadProjects(){
             { url: `https://media.githubusercontent.com/media/${USERNAME}/${REPO}/${BRANCH}/video${index}.avi`, type: "video/x-msvideo" }
         ];
 
-        let videoFound = null;
-        for(const fmt of videoFormats){
-            const ok = await checkVideo(fmt.url);
-            if(ok){ videoFound = fmt; break; }
-        }
+        let videoFound = videoFormats[0];
 
-        const card = document.createElement("div");
-        card.className = "card";
+        const cardEl = document.createElement("div");
+        cardEl.className = "card";
 
-        card.innerHTML = `
+        cardEl.innerHTML = `
             <img src="${imageFinal}" alt="${title}">
-            ${videoFound ? `
-            <video controls>
-                <source src="${videoFound.url}" type="${videoFound.type}">
+            <video controls id="vid${index}" style="display:block;width:100%;max-height:420px;background:black;">
+                ${videoFormats.map(f => `<source src="${f.url}" type="${f.type}">`).join("")}
             </video>
-            ` : ``}
             <div class="card-content">
                 <h3>${title}</h3>
                 <p>${description}</p>
             </div>
         `;
 
-        gallery.appendChild(card);
+        gallery.appendChild(cardEl);
+
+        const vidEl = cardEl.querySelector("video");
+        vidEl.addEventListener("error", () => { vidEl.style.display = "none"; });
+        vidEl.load();
+        setTimeout(() => {
+            if(vidEl.readyState === 0) vidEl.style.display = "none";
+        }, 3000);
 
         index++;
     }
